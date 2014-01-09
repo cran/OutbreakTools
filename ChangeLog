@@ -1,0 +1,64 @@
+			CHANGES IN OUTBREAKTOOLS 0.1-0
+NEW FEATURES
+	o epibase 0.1-2 becomes OutbreakTools 0.1-0 due to a trademark
+	infringement.
+
+	
+
+			CHANGES IN EPIBASE 0.1-2
+
+NEW FEATURES
+
+	o Changed the structure of obkData and obkSequences objects. The
+	@samples slot was too contraining and has been replaced with a
+	slot @records, storing any time-stamped information at an
+	individual level. The @clinical slot has been renamed to @context,
+	and is used to store any time-stamped information at a
+	populational level (e.g. climatic variables, school closures,
+	etc.). okbSequence objects are now storing meta-information on the
+	sequences as well.
+
+	o Improvement of various plotting methods; in particular,
+	plotIndividualTimeline now allows for visualizing any time-stamped
+	information.
+
+	o New accessors for dates and individuals in obkSequences, and for
+	dates in obkContacts
+
+	o New procedure as.data.frame for obkContacts
+
+	o New functions make.tip.attributes, make.sequence.attribute,
+	make.individual.attributes, returning a wide-format data.frame
+	where all information relating to these items is displayed.
+
+
+
+			CHANGES IN EPIBASE 0.1-0
+
+FIXES
+
+	o changed the NAMESPACE so as to depend on less packages
+
+	o as the vignette uses knir, OutbreakTools now explicitely depends on R
+	>= 3.0.0
+
+
+
+			CHANGES IN EPIBASE 0.1-0
+
+NEW FEATURES
+
+	o first release of the package!
+
+	o Data classes & accessors: obkData, obkSequences, obkContacts
+
+	o plotting methods: plotGeo, plotIndividualTimeline, plotggphy,
+	plotggMST
+
+	o subset for obkData
+
+	o read.annotated.tree and read.annotated.nexus
+
+	o simuEpi to simulate outbreak under a SIR model
+
+	o a 46-pages vignette (using knitr)
