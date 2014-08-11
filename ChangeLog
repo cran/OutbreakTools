@@ -1,3 +1,10 @@
+			CHANGES IN OUTBREAKTOOLS 0.1-11
+BUG FIXES
+	o using tryCatch to handle errors plotting maps without internet
+	connection in example files.
+
+
+
 			CHANGES IN OUTBREAKTOOLS 0.1-1
 BUG FIXES
 	o examples involving plotting maps commented out to prevent check
