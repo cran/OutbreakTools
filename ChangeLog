@@ -1,7 +1,15 @@
-			CHANGES IN OUTBREAKTOOLS 0.1-11
-BUG FIXES
-	o using tryCatch to handle errors plotting maps without internet
-	connection in example files.
+			CHANGES IN OUTBREAKTOOLS 0.1-12
+NEW FEATURES
+	o Modified summary and .inlineSummary functions to handle NAs more effectively.
+
+	o Modified JSON2obkData function to filter out a wider range of missing values
+	under different notations (ie. NA, "", "NR") when importing data from JSON format
+	and converting to obkData objects.
+
+	o Added .importFromJSON function to allow for automatic retrieval (with
+	package RCurl), reformatting (into slots appropriate to obkData class)
+	, and conversion of JSON-formatted data from URL addresses to obkData
+	objects (with JSON2obkData function).
 
 
 
@@ -9,7 +17,6 @@ BUG FIXES
 BUG FIXES
 	o examples involving plotting maps commented out to prevent check
 	to fail when no internet connection
-
 
 
 			CHANGES IN OUTBREAKTOOLS 0.1-0
