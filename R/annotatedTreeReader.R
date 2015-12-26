@@ -8,6 +8,10 @@
     annotations <- list()
     end <- 1
 
+    # Merge node and branch annotations
+    text <- gsub("\\[&(.*?)\\]:\\[&(.*?)\\]", ":\\[&\\1,\\2\\]", text)
+    text <- gsub("\\[&(.*?)\\]:", ":\\[&\\1]", text)
+
     pattern = "\\[&.*?\\]"
 
     repeat {
@@ -74,6 +78,8 @@
     } else {
         if (!is.na(suppressWarnings(as.numeric(value)))) { # is a number
             value = as.numeric(value)
+        } else { # is a string
+        	 value <- gsub("\\\"","", value)
         }
     }
     return(value)
@@ -127,23 +133,29 @@
         edge[j, 1] <<- current.node
         edge[j, 2] <<- tip
         index[tip] <<- j
-        X <- unlist(strsplit(tpc[k], ":"))
+        X <- unlist(strsplit(new.tpc[k], ":"))
         tip.label[tip] <<- X[1]
-        edge.length[j] <<- as.numeric(X[2])
-        
-        permute[[j]] <<- annotations[[k]] ## permute traits
-            
+        index <- length(X)
+        edge.length[j] <<- as.numeric(X[index])
+
+        if (length(annotations) > 0) {
+        	permute[[j]] <<- annotations[[as.numeric(X[2])]] ## permute traits
+        }
+
         k <<- k + 1L
         tip <<- tip + 1L
         j <<- j + 1L
     }
     go.down <- function() {
         l <- index[current.node]
-        X <- unlist(strsplit(tpc[k], ":"))
+        X <- unlist(strsplit(new.tpc[k], ":"))
         node.label[current.node - nb.tip] <<- X[1]
-        edge.length[l] <<- as.numeric(X[2])
-        
-        permute[[l]] <<- annotations[[k]] ## permute traits
+        index <- length(X)
+        edge.length[l] <<- as.numeric(X[index])
+
+        if (length(annotations) >  0) {
+        	permute[[l]] <<- annotations[[as.numeric(X[2])]] ## permute traits
+        }
 
         k <<- k + 1L
         current.node <<- edge[l, 1]
@@ -164,11 +176,26 @@
     annotations = result$annotations
     new.tp.stripped = result$tree
 
+    # patched for 0.0 root branch length from BEAST2 (not confirmed)
+    new.tp.stripped <- gsub("\\]0.0;", "\\];", new.tp.stripped)
+
+    root.annotation.number <- NULL
+    m <- regexpr("\\[\\d+\\];", new.tp.stripped)
+    if (m != -1) {
+    	root.annotation.number <- as.numeric(
+    		gsub("\\[(\\d+)\\];", "\\1", regmatches(new.tp.stripped, m)))
+    }
+
     annotations = lapply(annotations, .parse.traits, header=TRUE)
 
     tp.stripped = gsub("\\[.*?\\]","",tp)
     tpc <- unlist(strsplit(tp.stripped, "[\\(\\),;]"))
     tpc <- tpc[nzchar(tpc)]
+
+    new.tp.stripped <- gsub("\\[\\d+\\];", ";", new.tp.stripped)
+    new.tp.stripped <- gsub("\\[(\\d+)\\]","\\1:", new.tp.stripped)
+    new.tpc <- unlist(strsplit(new.tp.stripped, "[\\(\\),;]"))
+    new.tpc <- new.tpc[nzchar(new.tpc)]
 
     tsp <- unlist(strsplit(tp.stripped, NULL))
     skeleton <- tsp[tsp %in% c("(", ")", ",", ";")]
@@ -186,29 +213,29 @@
     index <- numeric(nb.edge + 1)
     index[node] <- nb.edge
     j <- k <- tip <- 1L
-    
+
     permute = list()
-    
+
     for (i in 2:nsk) {
         if (skeleton[i] == "(") {
-            add.internal()           
+            add.internal()
         }
         if (skeleton[i] == ",") {
             if (skeleton[i - 1] != ")") {
-                add.terminal()            	
+                add.terminal()
             }
         }
         if (skeleton[i] == ")") {
             if (skeleton[i - 1] == ",") {
-                add.terminal()               
+                add.terminal()
                 go.down()
             }
             if (skeleton[i - 1] == ")") {
                 go.down()
             }
-        }        
+        }
     }
-    
+
     edge <- edge[-nb.edge, ]
     obj <- list(edge = edge, Nnode = nb.node, tip.label = tip.label)
     root.edge <- edge.length[nb.edge]
@@ -223,6 +250,10 @@
         obj$root.edge <- root.edge
     class(obj) <- "phylo"
     attr(obj, "order") <- "cladewise"
+
+    if (!is.null(root.annotation.number)) {
+    	obj$root.annotation <- annotations[[root.annotation.number]]
+    }
 
     obj$annotations = permute
     obj
@@ -312,6 +343,7 @@ read.annotated.tree <- function (file = "", text = NULL, tree.names = NULL, skip
     obj
 }
 
+
 read.annotated.nexus <- function (file, tree.names = NULL) {
     X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
     LEFT <- grep("\\[", X)
@@ -390,10 +422,19 @@ read.annotated.nexus <- function (file, tree.names = NULL) {
     STRING <- gsub("\\[&R\\]", "", STRING)
 
     ## TODO Parse out tree-level traits
-    nms.trees <- sub(" *= *.*", "", STRING)
-    nms.trees <- sub("^ *tree *", "", nms.trees, ignore.case = TRUE)
+    nms.annontations.trees <- sub(" * = *.*", "", STRING)
+    nms.annontations.trees <- sub("^ *tree *", "", nms.annontations.trees, ignore.case = TRUE)
 
-    STRING <- sub("^.*?= *", "", STRING)
+    nms.trees <- sub("\\s+\\[&.*?\\]", "", nms.annontations.trees)
+
+    if (any(nms.trees != nms.annontations.trees)) { # There are tree-level annontations
+    	annotations.trees <- sub(".*\\[&", "\\[&", nms.annontations.trees)
+    	annotations.trees = lapply(annotations.trees, .parse.traits, header=TRUE)
+    } else {
+    	annotations.trees <- NULL
+    }
+
+    STRING <- sub("^.*? = *", "", STRING)
     STRING <- gsub("\\s", "", STRING)
 
     ##    browser()
@@ -450,26 +491,40 @@ read.annotated.nexus <- function (file, tree.names = NULL) {
     if (Ntree == 1) {
         trees <- trees[[1]]
         if (translation) {
-            trees$tip.label <- if (length(colon))
-                TRANS[, 2]
-            else TRANS[, 2][as.numeric(trees$tip.label)]
+            trees$tip.label <- # if (length(colon)) {
+                # TRANS[, 2]
+            #} else {
+            	TRANS[, 2][as.numeric(trees$tip.label)]
+            #}
         }
     }
     else {
         if (!is.null(tree.names))
             names(trees) <- tree.names
         if (translation) {
-            if (length(colon) == Ntree)
-                attr(trees, "TipLabel") <- TRANS[, 2]
-            else {
+            # if (length(colon) == Ntree)
+              #  attr(trees, "TipLabel") <- TRANS[, 2]
+            #else {
                 for (i in 1:Ntree) trees[[i]]$tip.label <- TRANS[, 2][as.numeric(trees[[i]]$tip.label)]
                 trees <- .compressTipLabel(trees)
-            }
+            #}
         }
         class(trees) <- "multiPhylo"
         if (!all(nms.trees == ""))
             names(trees) <- nms.trees
     }
+
+    # Add tree-level annotations back on
+    if (!is.null(annotations.trees)) {
+    	if (Ntree == 1) {
+    		trees$tree.annotations <- annotations.trees[[1]]
+    	} else {
+    		for (i in 1:Ntree) {
+    			trees[[i]]$tree.annotations <- annotations.trees[[i]]
+    		}
+    	}
+    }
+
     trees
 } # end read.annotated.nexus
 
