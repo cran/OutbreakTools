@@ -1,6 +1,6 @@
 b70f1f387fdea2ef77f60347505334d6 *ChangeLog
-ac4a420873e7e09a2b09b16c7d59f59f *DESCRIPTION
-f410b59e1960d31e40fc37d794bc6e80 *NAMESPACE
+28fa09d7909fa2c2ab97e0608e237632 *DESCRIPTION
+6bddbc729b9be16787ee914ccd759977 *NAMESPACE
 20e054497eb8e67d78b069a388a637b3 *R/OutbreakTools.R
 0d0f710713447c3c4e7e922b95ced49d *R/annotatedTreeReader.R
 d606c1301a254c19d5302347a0b02686 *R/auxClasses.R
@@ -26,7 +26,7 @@ a891901f9fdf7c592cf900529f93bfb8 *R/subset.R
 49bba3246fcdd5c48770804ad6d0f3c9 *R/uniqSequences.R
 c2689f59d39bd81e3028fa3e8eed72ae *R/utils.R
 37bdba9a704a2a525f8764e6a4fccdeb *R/zzz.R
-b4d7887c4acc7d16fe4457a59d2641d1 *build/vignette.rds
+1d7421f080a01b4a3c217fda5d1a8597 *build/vignette.rds
 e6d0d4dba805eb33d8290b7e6a2588ad *data/FluH1N1pdm2009.RData
 f82f7e16636ad49619bc87ad5cc3863f *data/HorseFlu.RData
 e2f320c56ccbbb1833c6591afa4d692e *data/HorseFluRaw.RData
@@ -34,7 +34,7 @@ e2f320c56ccbbb1833c6591afa4d692e *data/HorseFluRaw.RData
 e551acfb10b89b1eb9ff6e71231241a8 *data/ToyOutbreakRaw.RData
 f673dd7df2ff104d73eec7e3ff1dba28 *inst/doc/OutbreakTools.R
 cc7e955fa185548e01c421549f74510f *inst/doc/OutbreakTools.Rnw
-09d1ad1a9be9c05c4a74f47530b0d5ae *inst/doc/OutbreakTools.pdf
+40e7793831e691dfd35d95475e37b787 *inst/doc/OutbreakTools.pdf
 1470607bdf124ecb2a9737e6eff07ca8 *inst/files/BEAST-expl.nex
 b063b117a96958e3f96c72724609eca2 *man/FluH1N1pdm2009.Rd
 657b5b2a94feea3299516e0c1d9b5f77 *man/HorseFlu.Rd
